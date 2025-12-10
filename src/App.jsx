@@ -499,11 +499,13 @@ function App() {
                     {/* Temperature Chart */}
                     <div className="temp-chart">
                       <div className="chart-bars">
-                        {weatherData.hourly.map((hour, idx) => {
-                          const maxTemp = Math.max(...weatherData.hourly.map(h => h.temp));
-                          const minTemp = Math.min(...weatherData.hourly.map(h => h.temp));
-                          const range = maxTemp - minTemp || 1;
-                          const height = ((hour.temp - minTemp) / range) * 100;
+                        {weatherData.hourly && weatherData.hourly.length > 0 && weatherData.hourly.map((hour, idx) => {
+                          const temps = weatherData.hourly.map(h => h.temp);
+                          const maxTemp = Math.max(...temps);
+                          const minTemp = Math.min(...temps);
+                          const range = maxTemp - minTemp || 10; // Default range if all temps same
+                          // Scale height between 20% and 100%
+                          const normalizedHeight = ((hour.temp - minTemp) / range) * 80 + 20;
                           const isCurrent = idx === 0;
 
                           return (
@@ -513,7 +515,7 @@ function App() {
                               </div>
                               <div
                                 className={`chart-bar ${isCurrent ? 'current' : 'forecast'}`}
-                                style={{ height: `${Math.max(height, 5)}%` }}
+                                style={{ height: `${normalizedHeight}%` }}
                               ></div>
                             </div>
                           );
