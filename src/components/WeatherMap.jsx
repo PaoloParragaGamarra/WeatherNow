@@ -56,6 +56,22 @@ function MapUpdater({ center }) {
     return null;
 }
 
+// Component to handle map resize when expanded/collapsed
+function MapResizer({ isExpanded }) {
+    const map = useMap();
+
+    useEffect(() => {
+        // Delay to allow CSS transition to complete
+        const timeout = setTimeout(() => {
+            map.invalidateSize();
+        }, 300);
+
+        return () => clearTimeout(timeout);
+    }, [isExpanded, map]);
+
+    return null;
+}
+
 // Component to handle map clicks
 function MapClickHandler({ onMapClick, setClickedPosition }) {
     useMapEvents({
@@ -160,6 +176,9 @@ export default function WeatherMap({ lat, lon, isDarkMode, onLocationSelect }) {
 
                     {/* Update map center when location changes */}
                     <MapUpdater center={center} />
+
+                    {/* Handle map resize when expanded/collapsed */}
+                    <MapResizer isExpanded={isExpanded} />
 
                     {/* Handle map clicks */}
                     <MapClickHandler
