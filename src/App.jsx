@@ -431,14 +431,10 @@ function App() {
               {/* Main Temp Display */}
               <div className="temp-card">
                 <div className="temp-display">
-                  <div className="icon animated-icon">
-                    <AnimatedWeatherIcon
-                      condition={weatherData.current.condition}
-                      size={80}
-                      isNight={isNighttime()}
-                    />
+                  <div className="temp-icon">
+                    {getWeatherIcon(weatherData.current.condition, 'large-icon')}
                   </div>
-                  <div>
+                  <div className="temp-info">
                     <div className="temp">{displayTemp(weatherData.current.temp)}{tempUnit}</div>
                     <div className="condition">{weatherData.current.description}</div>
                   </div>
