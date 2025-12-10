@@ -10,6 +10,11 @@ const Icons = {
       <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
     </svg>
   ),
+  Moon: ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  ),
   Cloud: ({ className }) => (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
@@ -78,6 +83,25 @@ const Icons = {
       <path d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9" />
       <polyline points="13 11 9 17 15 17 11 23" />
     </svg>
+  ),
+  Star: ({ className, filled }) => (
+    <svg className={className} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </svg>
+  ),
+  X: ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  ),
+  Calendar: ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
   )
 };
 
@@ -110,13 +134,29 @@ const getUVLevel = (uvi) => {
 };
 
 // Get background class based on conditions
-const getBackgroundClass = (condition) => {
-  if (!condition) return 'bg-default';
+const getBackgroundClass = (condition, isDark) => {
+  if (!condition) return isDark ? 'bg-dark-default' : 'bg-light-default';
 
   const hour = new Date().getHours();
   const isEvening = hour >= 17 && hour < 20;
   const isNight = hour >= 20 || hour < 6;
 
+  if (!isDark) {
+    // Light mode backgrounds
+    switch (condition) {
+      case 'Clear':
+        return 'bg-light-sunny';
+      case 'Rain':
+      case 'Drizzle':
+        return 'bg-light-rainy';
+      case 'Clouds':
+        return 'bg-light-cloudy';
+      default:
+        return 'bg-light-default';
+    }
+  }
+
+  // Dark mode backgrounds
   switch (condition) {
     case 'Clear':
       if (isNight) return 'bg-sunny-night';
@@ -140,8 +180,40 @@ const calculateAvgTemp = (hourlyData, startIndex, count) => {
   return Math.round(sum / slice.length);
 };
 
+// Format day name from timestamp
+const getDayName = (timestamp, index) => {
+  if (index === 0) return 'Today';
+  if (index === 1) return 'Tomorrow';
+  const date = new Date(timestamp * 1000);
+  return date.toLocaleDateString('en-US', { weekday: 'short' });
+};
+
+// Local storage helpers for favorites
+const getFavorites = () => {
+  try {
+    return JSON.parse(localStorage.getItem('weatherFavorites')) || [];
+  } catch {
+    return [];
+  }
+};
+
+const saveFavorites = (favorites) => {
+  localStorage.setItem('weatherFavorites', JSON.stringify(favorites));
+};
+
+// Get saved theme
+const getSavedTheme = () => {
+  const saved = localStorage.getItem('weatherTheme');
+  if (saved) return saved === 'dark';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+};
+
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [favorites, setFavorites] = useState(getFavorites);
+  const [isDarkMode, setIsDarkMode] = useState(getSavedTheme);
+  const [activeTab, setActiveTab] = useState('hourly'); // 'hourly' or 'daily'
+
   const {
     weatherData,
     location,
@@ -157,6 +229,12 @@ function App() {
     fetchWeatherByCity('New York');
   }, []);
 
+  // Save theme preference
+  useEffect(() => {
+    localStorage.setItem('weatherTheme', isDarkMode ? 'dark' : 'light');
+    document.body.className = isDarkMode ? 'dark-mode' : 'light-mode';
+  }, [isDarkMode]);
+
   const handleSearch = () => {
     if (searchQuery.trim()) {
       fetchWeatherByCity(searchQuery);
@@ -169,8 +247,36 @@ function App() {
     }
   };
 
+  const toggleFavorite = () => {
+    if (!location) return;
+
+    const isFavorite = favorites.some(f => f.displayName === location.displayName);
+    let newFavorites;
+
+    if (isFavorite) {
+      newFavorites = favorites.filter(f => f.displayName !== location.displayName);
+    } else {
+      newFavorites = [...favorites, {
+        displayName: location.displayName,
+        lat: location.lat,
+        lon: location.lon
+      }];
+    }
+
+    setFavorites(newFavorites);
+    saveFavorites(newFavorites);
+  };
+
+  const removeFavorite = (displayName) => {
+    const newFavorites = favorites.filter(f => f.displayName !== displayName);
+    setFavorites(newFavorites);
+    saveFavorites(newFavorites);
+  };
+
+  const isFavorite = location && favorites.some(f => f.displayName === location.displayName);
+
   return (
-    <div className={`app-container ${getBackgroundClass(weatherData?.current?.condition)}`}>
+    <div className={`app-container ${getBackgroundClass(weatherData?.current?.condition, isDarkMode)} ${isDarkMode ? 'dark' : 'light'}`}>
       {/* Ambient Light Effects */}
       <div className="ambient-effects">
         <div className="ambient-circle top-right"></div>
@@ -180,10 +286,19 @@ function App() {
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-content">
-          {/* Logo */}
-          <div className="logo">
-            <h1>Weather</h1>
-            <div className="logo-underline"></div>
+          {/* Logo & Theme Toggle */}
+          <div className="logo-row">
+            <div className="logo">
+              <h1>Weather</h1>
+              <div className="logo-underline"></div>
+            </div>
+            <button
+              className="theme-toggle"
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {isDarkMode ? <Icons.Sun /> : <Icons.Moon />}
+            </button>
           </div>
 
           {/* Search */}
@@ -208,10 +323,35 @@ function App() {
               disabled={loading}
               className="btn-secondary"
             >
-              <Icons.Navigation className="" style={{ width: '1.25rem', height: '1.25rem' }} />
+              <Icons.Navigation style={{ width: '1.25rem', height: '1.25rem' }} />
               Use My Location
             </button>
           </div>
+
+          {/* Favorite Locations */}
+          {favorites.length > 0 && (
+            <div className="favorites-section">
+              <h3>⭐ Favorites</h3>
+              <div className="favorites-list">
+                {favorites.map((fav, idx) => (
+                  <div key={idx} className="favorite-item">
+                    <button
+                      className="favorite-name"
+                      onClick={() => fetchWeatherByCity(fav.displayName.split(',')[0])}
+                    >
+                      {fav.displayName.split(',')[0]}
+                    </button>
+                    <button
+                      className="favorite-remove"
+                      onClick={() => removeFavorite(fav.displayName)}
+                    >
+                      <Icons.X style={{ width: '1rem', height: '1rem' }} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Error Message */}
           {error && (
@@ -223,19 +363,28 @@ function App() {
           {/* Current Weather */}
           {weatherData && (
             <div>
-              {/* Location & Refresh */}
+              {/* Location & Actions */}
               <div className="weather-header">
                 <div>
                   <h2>Current Weather</h2>
                   <p className="location">{location?.displayName || 'Unknown'}</p>
                 </div>
-                <button
-                  onClick={refresh}
-                  disabled={loading}
-                  className="btn-icon"
-                >
-                  <Icons.RefreshCw className={loading ? 'spin' : ''} />
-                </button>
+                <div className="header-actions">
+                  <button
+                    onClick={toggleFavorite}
+                    className="btn-icon"
+                    title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                  >
+                    <Icons.Star filled={isFavorite} className={isFavorite ? 'icon-amber' : ''} />
+                  </button>
+                  <button
+                    onClick={refresh}
+                    disabled={loading}
+                    className="btn-icon"
+                  >
+                    <Icons.RefreshCw className={loading ? 'spin' : ''} />
+                  </button>
+                </div>
               </div>
 
               {/* Main Temp Display */}
@@ -319,78 +468,117 @@ function App() {
 
         {weatherData && (
           <>
-            {/* Temperature Graph Card */}
+            {/* Forecast Card with Tabs */}
             <div className="forecast-card">
               <div className="forecast-header">
-                <h3>48-Hour Forecast</h3>
-                <p>Temperature trends and conditions</p>
+                <div>
+                  <h3>Weather Forecast</h3>
+                  <p>Temperature trends and conditions</p>
+                </div>
+                <div className="forecast-tabs">
+                  <button
+                    className={`tab ${activeTab === 'hourly' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('hourly')}
+                  >
+                    48 Hours
+                  </button>
+                  <button
+                    className={`tab ${activeTab === 'daily' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('daily')}
+                  >
+                    5 Days
+                  </button>
+                </div>
               </div>
 
               <div className="forecast-content">
-                {/* Temperature Chart */}
-                <div className="temp-chart">
-                  <div className="chart-bars">
-                    {weatherData.hourly.map((hour, idx) => {
-                      const maxTemp = Math.max(...weatherData.hourly.map(h => h.temp));
-                      const minTemp = Math.min(...weatherData.hourly.map(h => h.temp));
-                      const range = maxTemp - minTemp || 1;
-                      const height = ((hour.temp - minTemp) / range) * 100;
-                      const isCurrent = idx === 0;
+                {activeTab === 'hourly' ? (
+                  <>
+                    {/* Temperature Chart */}
+                    <div className="temp-chart">
+                      <div className="chart-bars">
+                        {weatherData.hourly.map((hour, idx) => {
+                          const maxTemp = Math.max(...weatherData.hourly.map(h => h.temp));
+                          const minTemp = Math.min(...weatherData.hourly.map(h => h.temp));
+                          const range = maxTemp - minTemp || 1;
+                          const height = ((hour.temp - minTemp) / range) * 100;
+                          const isCurrent = idx === 0;
 
-                      return (
-                        <div key={idx} className="chart-bar-container">
-                          <div className="chart-tooltip">
-                            <span>{hour.temp}°</span>
-                          </div>
-                          <div
-                            className={`chart-bar ${isCurrent ? 'current' : 'forecast'}`}
-                            style={{ height: `${Math.max(height, 5)}%` }}
-                          ></div>
+                          return (
+                            <div key={idx} className="chart-bar-container">
+                              <div className="chart-tooltip">
+                                <span>{hour.temp}°</span>
+                              </div>
+                              <div
+                                className={`chart-bar ${isCurrent ? 'current' : 'forecast'}`}
+                                style={{ height: `${Math.max(height, 5)}%` }}
+                              ></div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <div className="chart-legend">
+                        <div className="legend-item">
+                          <div className="legend-dot current"></div>
+                          <span>Current</span>
                         </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Legend */}
-                  <div className="chart-legend">
-                    <div className="legend-item">
-                      <div className="legend-dot current"></div>
-                      <span>Current Hour</span>
-                    </div>
-                    <div className="legend-item">
-                      <div className="legend-dot forecast"></div>
-                      <span>Forecast</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Hourly Details Scroll */}
-                <div className="hourly-scroll">
-                  <div className="hourly-cards">
-                    {weatherData.hourly.map((hour, idx) => {
-                      const isCurrent = idx === 0;
-                      return (
-                        <div
-                          key={idx}
-                          className={`hourly-card ${isCurrent ? 'current' : ''}`}
-                        >
-                          <div className="hourly-time">
-                            {isCurrent ? 'NOW' : hour.time}
-                          </div>
-                          <div className="hourly-icon">
-                            {getWeatherIcon(hour.condition)}
-                          </div>
-                          <div className="hourly-temp">
-                            {hour.temp}°
-                          </div>
-                          <div className="hourly-rain">
-                            💧 {hour.rain}%
-                          </div>
+                        <div className="legend-item">
+                          <div className="legend-dot forecast"></div>
+                          <span>Forecast</span>
                         </div>
-                      );
-                    })}
+                      </div>
+                    </div>
+
+                    {/* Hourly Scroll */}
+                    <div className="hourly-scroll">
+                      <div className="hourly-cards">
+                        {weatherData.hourly.map((hour, idx) => {
+                          const isCurrent = idx === 0;
+                          return (
+                            <div
+                              key={idx}
+                              className={`hourly-card ${isCurrent ? 'current' : ''}`}
+                            >
+                              <div className="hourly-time">
+                                {isCurrent ? 'NOW' : hour.time}
+                              </div>
+                              <div className="hourly-icon">
+                                {getWeatherIcon(hour.condition)}
+                              </div>
+                              <div className="hourly-temp">
+                                {hour.temp}°
+                              </div>
+                              <div className="hourly-rain">
+                                💧 {hour.rain}%
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  /* 5-Day Forecast */
+                  <div className="daily-forecast">
+                    {weatherData.daily.map((day, idx) => (
+                      <div key={idx} className={`daily-card ${idx === 0 ? 'today' : ''}`}>
+                        <div className="daily-day">{getDayName(day.dt, idx)}</div>
+                        <div className="daily-icon">
+                          {getWeatherIcon(day.condition)}
+                        </div>
+                        <div className="daily-condition">{day.condition}</div>
+                        <div className="daily-temps">
+                          <span className="temp-high">{day.tempMax}°</span>
+                          <span className="temp-low">{day.tempMin}°</span>
+                        </div>
+                        <div className="daily-rain">
+                          💧 {day.rain}%
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
+                )}
               </div>
             </div>
 
