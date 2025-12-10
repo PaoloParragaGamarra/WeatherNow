@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useWeather } from './hooks/useWeather';
+import WeatherMap from './components/WeatherMap';
 import './App.css';
 
 // Icons as simple SVG components
@@ -581,6 +582,13 @@ function App() {
                 )}
               </div>
             </div>
+
+            {/* Weather Radar Map */}
+            <WeatherMap
+              lat={location?.lat}
+              lon={location?.lon}
+              isDarkMode={isDarkMode}
+            />
 
             {/* Summary Cards */}
             <div className="summary-grid">
