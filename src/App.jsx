@@ -221,6 +221,7 @@ function App() {
     loading,
     error,
     fetchWeatherByCity,
+    fetchWeatherByCoords,
     fetchWeatherByGeolocation,
     refresh
   } = useWeather();
@@ -588,6 +589,7 @@ function App() {
               lat={location?.lat}
               lon={location?.lon}
               isDarkMode={isDarkMode}
+              onLocationSelect={fetchWeatherByCoords}
             />
 
             {/* Summary Cards */}
