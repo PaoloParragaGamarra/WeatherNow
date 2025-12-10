@@ -233,7 +233,7 @@ export function getCurrentPosition() {
                 }
                 reject(new Error(message));
             },
-            { timeout: 10000, enableHighAccuracy: false }
+            { timeout: 30000, enableHighAccuracy: true, maximumAge: 60000 }
         );
     });
 }
