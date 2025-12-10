@@ -1872,3 +1872,396 @@ body {
   display: block;
   margin-bottom: 0.25rem;
 }
+
+/* ===== HEADER CONTROLS ===== */
+.header-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.unit-toggle {
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dark .unit-toggle {
+  color: white;
+}
+
+.light .unit-toggle {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: var(--light-text);
+}
+
+.unit-toggle:hover {
+  transform: scale(1.05);
+  background: rgba(59, 130, 246, 0.3);
+}
+
+/* ===== ANIMATED WEATHER ICON ===== */
+.animated-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.animated-weather-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== SUNRISE SUNSET CARD ===== */
+.sunrise-sunset-card {
+  backdrop-filter: blur(24px);
+  border-radius: 1.5rem;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.dark .sunrise-sunset-card {
+  background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.light .sunrise-sunset-card {
+  background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.sun-arc-container {
+  width: 100%;
+  padding: 0 1rem;
+}
+
+.sun-arc-svg {
+  width: 100%;
+  height: auto;
+}
+
+.dark .horizon-line,
+.dark .arc-bg {
+  stroke: rgba(255, 255, 255, 0.2);
+}
+
+.light .horizon-line,
+.light .arc-bg {
+  stroke: rgba(0, 0, 0, 0.15);
+}
+
+.sun-times {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
+.dark .sun-times {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.light .sun-times {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.sun-time {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sun-emoji {
+  font-size: 1.5rem;
+}
+
+.sun-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dark .sun-label {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.light .sun-label {
+  color: var(--light-text-muted);
+}
+
+.sun-value {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.dark .sun-value {
+  color: white;
+}
+
+.light .sun-value {
+  color: var(--light-text);
+}
+
+.sun-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.status-icon {
+  font-size: 1.25rem;
+}
+
+.status-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.dark .status-text {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.light .status-text {
+  color: var(--light-text-muted);
+}
+
+/* ===== PRECIPITATION CHART ===== */
+.precipitation-chart {
+  backdrop-filter: blur(40px);
+  border-radius: 2rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.dark .precipitation-chart {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.light .precipitation-chart {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.precip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.precip-header h4 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.dark .precip-header h4 {
+  color: white;
+}
+
+.light .precip-header h4 {
+  color: var(--light-text);
+}
+
+.precip-subtitle {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.dark .precip-subtitle {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.light .precip-subtitle {
+  color: var(--light-text-muted);
+}
+
+.precip-graph {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.precip-y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding-right: 0.5rem;
+  height: 8rem;
+}
+
+.dark .precip-y-axis {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.light .precip-y-axis {
+  color: var(--light-text-muted);
+}
+
+.precip-bars {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  height: 8rem;
+  gap: 2px;
+  padding-bottom: 1.5rem;
+  position: relative;
+}
+
+.precip-bar-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  position: relative;
+}
+
+.precip-bar {
+  width: 100%;
+  max-width: 1.5rem;
+  border-radius: 0.25rem 0.25rem 0 0;
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.precip-bar.low {
+  background: linear-gradient(to top, rgba(59, 130, 246, 0.3), rgba(59, 130, 246, 0.5));
+}
+
+.precip-bar.medium {
+  background: linear-gradient(to top, rgba(59, 130, 246, 0.5), rgba(59, 130, 246, 0.8));
+}
+
+.precip-bar.high {
+  background: linear-gradient(to top, rgba(59, 130, 246, 0.8), rgba(37, 99, 235, 1));
+}
+
+.precip-bar:hover {
+  transform: scaleY(1.05);
+}
+
+.precip-tooltip {
+  position: absolute;
+  top: -1.5rem;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.precip-bar:hover .precip-tooltip {
+  opacity: 1;
+}
+
+.precip-time {
+  position: absolute;
+  bottom: -1.25rem;
+  font-size: 0.5rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.dark .precip-time {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.light .precip-time {
+  color: var(--light-text-muted);
+}
+
+.precip-legend {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+}
+
+.dark .precip-legend {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.light .precip-legend {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.precip-legend .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.dark .precip-legend .legend-item {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.light .precip-legend .legend-item {
+  color: var(--light-text-muted);
+}
+
+.legend-bar {
+  width: 1rem;
+  height: 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.legend-bar.low {
+  background: rgba(59, 130, 246, 0.4);
+}
+
+.legend-bar.medium {
+  background: rgba(59, 130, 246, 0.7);
+}
+
+.legend-bar.high {
+  background: rgba(37, 99, 235, 1);
+}
+
+/* ===== WEATHER BACKGROUNDS ENHANCED ===== */
+.app-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bg-sunny::before {
+  background: radial-gradient(circle at 80% 20%, rgba(251, 191, 36, 0.3) 0%, transparent 50%);
+}
+
+.bg-rainy::before {
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(59, 130, 246, 0.1) 100%),
+    repeating-linear-gradient(90deg, transparent 0px, transparent 20px, rgba(59, 130, 246, 0.03) 20px, rgba(59, 130, 246, 0.03) 21px);
+}
+
+.bg-cloudy::before {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 70% 50%, rgba(255, 255, 255, 0.08) 0%, transparent 35%);
+}

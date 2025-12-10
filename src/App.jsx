@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useWeather } from './hooks/useWeather';
 import WeatherMap from './components/WeatherMap';
+import AnimatedWeatherIcon from './components/AnimatedWeatherIcon';
+import SunriseSunset from './components/SunriseSunset';
+import PrecipitationChart from './components/PrecipitationChart';
 import './App.css';
 
 // Icons as simple SVG components
@@ -209,11 +212,31 @@ const getSavedTheme = () => {
   return window.matchMedia('(prefers-color-scheme: dark)').matches;
 };
 
+// Get saved temperature unit
+const getSavedUnit = () => {
+  const saved = localStorage.getItem('weatherUnit');
+  return saved !== 'fahrenheit'; // Default to Celsius
+};
+
+// Convert Celsius to Fahrenheit
+const toFahrenheit = (celsius) => Math.round((celsius * 9 / 5) + 32);
+
+// Check if it's nighttime
+const isNighttime = () => {
+  const hour = new Date().getHours();
+  return hour >= 20 || hour < 6;
+};
+
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [favorites, setFavorites] = useState(getFavorites);
   const [isDarkMode, setIsDarkMode] = useState(getSavedTheme);
+  const [isCelsius, setIsCelsius] = useState(getSavedUnit);
   const [activeTab, setActiveTab] = useState('hourly'); // 'hourly' or 'daily'
+
+  // Temperature display helper
+  const displayTemp = (temp) => isCelsius ? temp : toFahrenheit(temp);
+  const tempUnit = isCelsius ? '°C' : '°F';
 
   const {
     weatherData,
@@ -236,6 +259,11 @@ function App() {
     localStorage.setItem('weatherTheme', isDarkMode ? 'dark' : 'light');
     document.body.className = isDarkMode ? 'dark-mode' : 'light-mode';
   }, [isDarkMode]);
+
+  // Save temperature unit preference
+  useEffect(() => {
+    localStorage.setItem('weatherUnit', isCelsius ? 'celsius' : 'fahrenheit');
+  }, [isCelsius]);
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -288,19 +316,30 @@ function App() {
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-content">
-          {/* Logo & Theme Toggle */}
+          {/* Logo & Controls */}
           <div className="logo-row">
             <div className="logo">
               <h1>Weather</h1>
               <div className="logo-underline"></div>
             </div>
-            <button
-              className="theme-toggle"
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            >
-              {isDarkMode ? <Icons.Sun /> : <Icons.Moon />}
-            </button>
+            <div className="header-controls">
+              {/* Temperature Unit Toggle */}
+              <button
+                className="unit-toggle"
+                onClick={() => setIsCelsius(!isCelsius)}
+                title={isCelsius ? 'Switch to Fahrenheit' : 'Switch to Celsius'}
+              >
+                {isCelsius ? '°C' : '°F'}
+              </button>
+              {/* Theme Toggle */}
+              <button
+                className="theme-toggle"
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              >
+                {isDarkMode ? <Icons.Sun /> : <Icons.Moon />}
+              </button>
+            </div>
           </div>
 
           {/* Search */}
@@ -392,18 +431,28 @@ function App() {
               {/* Main Temp Display */}
               <div className="temp-card">
                 <div className="temp-display">
-                  <div className="icon">
-                    {getWeatherIcon(weatherData.current.condition)}
+                  <div className="icon animated-icon">
+                    <AnimatedWeatherIcon
+                      condition={weatherData.current.condition}
+                      size={80}
+                      isNight={isNighttime()}
+                    />
                   </div>
                   <div>
-                    <div className="temp">{weatherData.current.temp}°</div>
-                    <div className="condition">{weatherData.current.condition}</div>
+                    <div className="temp">{displayTemp(weatherData.current.temp)}{tempUnit}</div>
+                    <div className="condition">{weatherData.current.description}</div>
                   </div>
                 </div>
                 <div className="feels-like">
-                  Feels like {weatherData.current.feelsLike}°C
+                  Feels like {displayTemp(weatherData.current.feelsLike)}{tempUnit}
                 </div>
               </div>
+
+              {/* Sunrise/Sunset Arc */}
+              <SunriseSunset
+                sunrise={weatherData.current.sunrise}
+                sunset={weatherData.current.sunset}
+              />
 
               {/* Detailed Stats */}
               <div className="stats-section">
@@ -511,7 +560,7 @@ function App() {
                           return (
                             <div key={idx} className="chart-bar-container">
                               <div className="chart-tooltip">
-                                <span>{hour.temp}°</span>
+                                <span>{displayTemp(hour.temp)}°</span>
                               </div>
                               <div
                                 className={`chart-bar ${isCurrent ? 'current' : 'forecast'}`}
@@ -551,7 +600,7 @@ function App() {
                                 {getWeatherIcon(hour.condition)}
                               </div>
                               <div className="hourly-temp">
-                                {hour.temp}°
+                                {displayTemp(hour.temp)}°
                               </div>
                               <div className="hourly-rain">
                                 💧 {hour.rain}%
@@ -573,8 +622,8 @@ function App() {
                         </div>
                         <div className="daily-condition">{day.condition}</div>
                         <div className="daily-temps">
-                          <span className="temp-high">{day.tempMax}°</span>
-                          <span className="temp-low">{day.tempMin}°</span>
+                          <span className="temp-high">{displayTemp(day.tempMax)}°</span>
+                          <span className="temp-low">{displayTemp(day.tempMin)}°</span>
                         </div>
                         <div className="daily-rain">
                           💧 {day.rain}%
@@ -594,13 +643,16 @@ function App() {
               onLocationSelect={fetchWeatherByCoords}
             />
 
+            {/* Precipitation Chart */}
+            <PrecipitationChart hourlyData={weatherData.hourly} />
+
             {/* Summary Cards */}
             <div className="summary-grid">
               <div className="summary-card emerald">
                 <Icons.TrendingUp />
                 <div className="label">Next 24 Hours</div>
                 <div className="value">
-                  {calculateAvgTemp(weatherData.hourly, 0, 8)}°C
+                  {displayTemp(calculateAvgTemp(weatherData.hourly, 0, 8))}{tempUnit}
                 </div>
                 <div className="sub">Average Temperature</div>
               </div>
@@ -609,7 +661,7 @@ function App() {
                 <Icons.Activity />
                 <div className="label">Following 24 Hours</div>
                 <div className="value">
-                  {calculateAvgTemp(weatherData.hourly, 8, 8)}°C
+                  {displayTemp(calculateAvgTemp(weatherData.hourly, 8, 8))}{tempUnit}
                 </div>
                 <div className="sub">Expected Average</div>
               </div>
